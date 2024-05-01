@@ -35,7 +35,7 @@ class LoginPage extends ConsumerWidget {
               // logo
               Container(
                 child: Image.network(
-                    'https://res.cloudinary.com/dfha4roeg/image/upload/v1699851938/logo_txriz6.png'),
+                    ''),
                 width: 300,
                 height: 300,
               ),
@@ -68,6 +68,7 @@ class LoginPage extends ConsumerWidget {
 
               const SizedBox(height: 10),
 
+              // forgot password?
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
               ),
