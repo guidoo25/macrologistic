@@ -23,6 +23,7 @@ class CardConductor extends StatelessWidget {
       child: Column(
         children: [
                Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                
                 MyButtonestade(
@@ -31,11 +32,11 @@ class CardConductor extends StatelessWidget {
                   color: Colors.yellow,
                   icon: Icons.play_arrow,
                 ),
-                SizedBox(width: 20),
+                SizedBox(width: 10),
                 MyButtonestade(onTap: (){}, nametext: 'Inicio', color: Colors.blue, icon: Icons.location_on),
-                SizedBox(width: 20),
+                SizedBox(width: 10),
                 MyButtonestade(onTap: (){}, nametext: 'Final', color: Colors.green, icon: Icons.flag),
-                SizedBox(width: 20),
+                SizedBox(width: 10),
                 MyButtonestade(onTap: (){
                   showDialog(context: context, builder: (context) => AlertDialog(
                     title: Text('Novedad'),
@@ -61,6 +62,7 @@ class CardConductor extends StatelessWidget {
             'Nombre del Cliente',
             style: TextStyle(fontSize: 16, color: Colors.black),
           ),
+          Text('Status:Asignado'),
           const SizedBox(height: 10),
           Row(
             children: [

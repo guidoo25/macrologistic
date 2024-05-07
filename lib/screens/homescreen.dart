@@ -10,7 +10,7 @@ class Homescreen extends StatelessWidget {
     return  Column(
       children: [
        Container(
-          height: MediaQuery.of(context).size.height * 0.7,
+          height: MediaQuery.of(context).size.height * 0.65,
           child:  MapScreen(),),
         CardConductor()
         
