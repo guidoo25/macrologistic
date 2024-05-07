@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:macrologistic/config/enviroments.dart';
 import 'package:macrologistic/shared/login/my_button.dart';
 import 'package:macrologistic/shared/login/my_textfield.dart';
 
@@ -28,53 +29,77 @@ class LoginPage extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-
-              // logo
               Container(
-                child: Image.network(
-                    ''),
-                width: 300,
-                height: 300,
-              ),
+                height: MediaQuery.of(context).size.height * 0.40,
+                width: MediaQuery.of(context).size.width,
+                color: Enviroments.primaryColor,
+                child: Column(
+                  children: [
+                    SizedBox(height: 20,),
+                    Image(image: AssetImage('icono.png'), width: 200, height: 200,),
 
-              const SizedBox(height: 50),
+                    Text(
+                      'Iniciar Sesión',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 35,
+                      )),
+                      Text(
+                        'Visualiza tus viajes asignados, rutas optimas y horarios.',
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          color: Colors.white,
+                          fontSize: 15,
+                        )),
+                        SizedBox(height: 10,),
+                        Text ('!Seguridad primero!',
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          color: Colors.white,
+                          fontSize: 22,
+                        ))
 
-              // welcome back, you've been missed!
-              Text(
-                'Bienvenido Identificate!',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 16,
+                    
+
+                  ],
                 ),
               ),
+                Container(
+            
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(45),
+                      topRight: Radius.circular(45),
 
-              const SizedBox(height: 25),
-
+                    ),
+                  ),
+                  child:Column(
+                    children: [
+                      Container(
+                child: Image.asset(
+                    'logoSistema.png'),
+                width: 200,
+                height: 200,
+              ),
+              
               MyTextField(
                 controller: usernameController,
                 hintText: 'Usuario',
                 obscureText: false,
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               MyTextField(
                 controller: passwordController,
                 hintText: 'Contraseña',
                 obscureText: true,
               ),
-
-              const SizedBox(height: 10),
-
-              // forgot password?
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              ),
-
-              const SizedBox(height: 25),
+              TextButton(onPressed: (){}, child: Text('Olvidaste tu contraseña?')),
               MyButton(
+                color: Colors.blue,
                 onTap: () {
                   context.go('/home');
                   
@@ -103,60 +128,11 @@ class LoginPage extends ConsumerWidget {
                 nametext: 'Ingresar', 
               ),
 
-              // sign in button
-
-              const SizedBox(height: 50),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        thickness: 0.5,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text(
-                        '',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        thickness: 0.5,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 50),
-
-              const SizedBox(height: 50),
-
-              // not a member? register now
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'No eres miembro?',
-                    style: TextStyle(color: Colors.grey[700]),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    'Contactate con el Administrador',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              )
+                )
             ],
+            
           ),
         ),
       ),
