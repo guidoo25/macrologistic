@@ -13,7 +13,7 @@ class navbar extends StatefulWidget {
 
 class _homeScreenState extends State<navbar> {
   int selectedIndex = 0;
-  final screens = [Homescreen(), ListViajes(), MapView()];
+  final screens = [Homescreen(), ListViajes(), SimpleExample()];
 
   @override
   Widget build(BuildContext context) {
