@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:macrologistic/models/viaje.dart';
 
-class conductorCard extends StatelessWidget {
-   final Viaje viaje;
-  conductorCard({
+class ConductorCard extends StatelessWidget {
+  final Viaje viaje;
+
+  ConductorCard({
     required this.viaje,
- 
   });
 
   @override
@@ -26,32 +26,56 @@ class conductorCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Origen: ${viaje.origen}'),
-                  Text('Cliente: ${viaje.cliente}'),
-                  Text('Destino: ${viaje.destino}'),
-                  Text('Fecha: ${viaje.fecha}'),
-                  Text('Estado: ${viaje.estado}'),
-                
-                ],
+              Text(
+                'Origen: ${viaje.origen}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const Spacer(),
-              Image.asset(
-                'assets/${viaje.imagen}',
-                width: 50,
-                height: 50,
+              SizedBox(height: 5),
+              Text(
+                'Cliente: ${viaje.cliente}',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Destino: ${viaje.destino}',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Fecha: ${viaje.fecha}',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Estado: ${viaje.estado}',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
+          const Spacer(),
+          Image.asset(
+            'assets/${viaje.imagen}',
+            width: 50,
+            height: 50,
+          ),
         ],
       ),
-
     );
   }
 }

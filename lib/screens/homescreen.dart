@@ -7,14 +7,18 @@ class Homescreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
-      children: [
-       Container(
-          height: MediaQuery.of(context).size.height * 0.65,
-          child:  MapScreen(),),
-        CardConductor()
-        
-      ],
-    );
+    return  Stack(
+  children: <Widget>[
+    Container(
+      child: MapScreen(),
+    ),
+    Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: CardConductor(),
+    ),
+  ],
+);
   }
 }

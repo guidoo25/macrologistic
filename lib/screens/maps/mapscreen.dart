@@ -6,6 +6,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:macrologistic/config/enviroments.dart';
 import 'package:macrologistic/widgets/conductor.dart';
 import 'package:open_route_service/open_route_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -29,6 +31,8 @@ class _MapScreenState extends State<MapScreen> {
   List listOfPoints = [];
   List<LatLng> points = [];
   List<Marker> markers = [];
+
+  
 
   Future<void> getCoordinates(LatLng lat1, LatLng lat2) async {
     setState(() {
@@ -227,5 +231,17 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
     );
+  }
+}
+void _launchMaps(LatLng start, LatLng end) async {
+  final String googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&travelmode=driving';
+  final String wazeUrl = 'https://waze.com/ul?ll=${end.latitude},${end.longitude}&navigate=yes';
+
+  if (await canLaunch(googleMapsUrl)) {
+    await launch(googleMapsUrl);
+  } else if (await canLaunch(wazeUrl)) {
+    await launch(wazeUrl);
+  } else {
+    throw 'Could not launch URL';
   }
 }

@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:macrologistic/shared/button_estade.dart';
 
 class CardConductor extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey, width: 1), // Agrega un borde
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Hace que la columna ocupe solo el espacio necesario
+          children:  [
                Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -66,16 +69,14 @@ class CardConductor extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              
               Icon(Icons.location_on, color: Colors.black),
               const SizedBox(width: 5),
-              Text(
-                'Ubicación del Cliente: Aeropuerto Jose Joaquin de Olmedo',
-                style: TextStyle(fontSize: 12, color: Colors.black),
+              Flexible(
+                child: Text(
+                  'Ubicación del Cliente: Aeropuerto Jose Joaquin de Olmedo',
+                  style: TextStyle(fontSize: 12, color: Colors.black),
+                ),
               ),
-
-
-
             ],
           ),
           const SizedBox(height: 5),
@@ -83,14 +84,16 @@ class CardConductor extends StatelessWidget {
             children: [
               Icon(Icons.arrow_forward, color: Colors.black),
               const SizedBox(width: 5),
-              Text(
-                'Lugar de destino: Hotel Oro Verde',
-                style: TextStyle(fontSize: 12, color: Colors.black),
+              Flexible(
+                child: Text(
+                  'Lugar de destino: Hotel Oro Verde',
+                  style: TextStyle(fontSize: 12, color: Colors.black),
+                ),
               ),
             ],
-          ),
-        ],
+          ),    ],
       ),
+    )
     );
   }
 }

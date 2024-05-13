@@ -1,9 +1,9 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macrologistic/screens/conductor/list_viaJes.dart';
 import 'package:macrologistic/screens/homescreen.dart';
+import 'package:macrologistic/screens/maps/mapview.dart';
 
 class navbar extends StatefulWidget {
   static const name = 'homeScreen';
@@ -13,7 +13,7 @@ class navbar extends StatefulWidget {
 
 class _homeScreenState extends State<navbar> {
   int selectedIndex = 0;
-  final screens = [Homescreen(), ListViajes(), Container()];
+  final screens = [Homescreen(), ListViajes(), MapView()];
 
   @override
   Widget build(BuildContext context) {
@@ -23,30 +23,27 @@ class _homeScreenState extends State<navbar> {
         index: selectedIndex,
         children: screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedFontSize: 12,
-        landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
-        type: BottomNavigationBarType.shifting,
+      bottomNavigationBar: CupertinoTabBar( // Use CupertinoTabBar for Apple-like appearance
+        backgroundColor: color.primary,
+        activeColor: Colors.white,
+        
         currentIndex: selectedIndex,
         onTap: ((value) => setState(() => selectedIndex = value)),
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.car_rental_rounded),
             activeIcon: Icon(Icons.car_rental),
-            backgroundColor: color.primary,
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.travel_explore_rounded),
             activeIcon: Icon(Icons.travel_explore_rounded),
             label: 'viajes',
-            backgroundColor: color.primary,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list_sharp),
             activeIcon: Icon(Icons.list),
             label: 'perfil',
-            backgroundColor: color.primary,
           ),
         ],
       ),
