@@ -5,6 +5,7 @@ class AppTheme {
   ThemeData getTheme() => ThemeData(
     useMaterial3: true,
     colorSchemeSeed:  Color.fromARGB(255, 26, 160, 250),
+    
 
 
   );

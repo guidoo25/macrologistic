@@ -87,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
               child: IconButton(
                 onPressed: () {},
                 icon: const Icon(Icons.location_on),
-                color: Colors.blue,
+                color: Enviroments.primaryColor,
                 iconSize: 45,
               ),
             ),
@@ -144,7 +144,7 @@ class _MapScreenState extends State<MapScreen> {
                 polylines: [
                   Polyline(
                     points: points,
-                    color: Colors.blue,
+                    color: Enviroments.primaryColor,
                     strokeWidth: 5,
                   ),
                 ],
@@ -154,7 +154,7 @@ class _MapScreenState extends State<MapScreen> {
           Visibility(
             visible: isLoading,
             child: Container(
-              color: Colors.blue.withOpacity(0.5),
+              color: Enviroments.primaryColor,
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                 child: const Center(
@@ -171,27 +171,22 @@ class _MapScreenState extends State<MapScreen> {
             child: Align(
               child: TextButton(
                 onPressed: () {
-                  if (markers.isEmpty) {
-                    // Se os marcadores estiverem vazios
-                    print('Marcar puntos en el  mapa');
-                  } else {
-                    setState(() {
-                      markers = [];
-                      points = [];
-                    });
+                  if (markers.isNotEmpty) {
+                    _launchMaps(markers[0].point, markers[1].point);
                   }
+   
                 },
                 child: Container(
                   width: 200,
                   height: 50,
                   decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Enviroments.primaryColor,
                       borderRadius: BorderRadius.circular(10)),
 
                     
                   child: Center(
                     child: Text(
-                      markers.isEmpty ? "Ruta de destino" : "Limpar ruta",
+                      markers.isEmpty ? "Ruta" : "Ver en Maps",
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ),
@@ -218,7 +213,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           const SizedBox(height: 10),
           FloatingActionButton(
-            backgroundColor: Colors.blue,
+            backgroundColor: Enviroments.primaryColor,
             onPressed: () {
               mapController.move(mapController.center, mapController.zoom - 1);
             },
