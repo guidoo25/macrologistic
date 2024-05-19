@@ -1,39 +1,67 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:macrologistic/config/enviroments.dart';
-import 'package:macrologistic/providers/mylocation.dart';
-import 'package:macrologistic/widgets/conductor.dart';
 import 'package:open_route_service/open_route_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class MapScreen extends ConsumerStatefulWidget {
+class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
   @override
-  ConsumerState<MapScreen> createState() => _MapScreenState();
+  State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends ConsumerState<MapScreen> {
-  late LatLng myPoint;
+class _MapScreenState extends State<MapScreen> {
+  final MapController mapController = MapController();
+  final LatLng defaultPoint = LatLng(-2.19616, -79.88621);
   bool isLoading = false;
+  LatLng? myLocation;
+
+  List<LatLng> points = [];
+  List<Marker> markers = [];
 
   @override
   void initState() {
-    myPoint = ref.read(locationProvider);
-    print("MyPoint: $myPoint");
-    myPoint = defaultPoint;
     super.initState();
+    _getCurrentLocation();
   }
 
-  final defaultPoint = LatLng(-2.19616, -79.88621);
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
 
-  List listOfPoints = [];
-  List<LatLng> points = [];
-  List<Marker> markers = [];
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return Future.error('Location services are disabled.');
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return Future.error('Location permissions are denied');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return Future.error(
+            'Location permissions are permanently denied, we cannot request permissions.');
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        myLocation = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      print('Error getting location: $e');
+    }
+  }
 
   Future<void> getCoordinates(LatLng lat1, LatLng lat2) async {
     setState(() {
@@ -47,7 +75,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final List<ORSCoordinate> routeCoordinates =
         await client.directionsRouteCoordsGet(
       startCoordinate:
-          ORSCoordinate(latitude: lat1.latitude, longitude: lat1.longitude),
+          ORSCoordinate(latitude: myLocation!.latitude, longitude: myLocation!.longitude),
       endCoordinate:
           ORSCoordinate(latitude: lat2.latitude, longitude: lat2.longitude),
     );
@@ -61,8 +89,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       isLoading = false;
     });
   }
-
-  final MapController mapController = MapController();
 
   void _handleTap(LatLng latLng) {
     setState(() {
@@ -102,7 +128,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
 
       if (markers.length == 2) {
-        // Adicionar um pequeno atraso antes de exibir o efeito de processo
         Future.delayed(const Duration(milliseconds: 500), () {
           setState(() {
             isLoading = true;
@@ -110,11 +135,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         });
 
         getCoordinates(markers[0].point, markers[1].point);
-
-        // Calcular a extensão (bounding box) que envolve os dois pontos marcados
         LatLngBounds bounds = LatLngBounds.fromPoints(
             markers.map((marker) => marker.point).toList());
-        // Fazer um zoom out para que a extensão se ajuste à tela
         mapController.fitBounds(bounds);
       }
     });
@@ -122,9 +144,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final location = ref.watch(locationProvider);
     return Scaffold(
-      body: location == null
+      body: myLocation == null
           ? const Center(
               child: CircularProgressIndicator(),
             )
@@ -134,9 +155,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   mapController: mapController,
                   options: MapOptions(
                     zoom: 16,
-                    center: location != null
-                        ? LatLng(location.latitude, location.longitude)
-                        : defaultPoint,
+                    center: myLocation ?? defaultPoint,
                     onTap: (tapPosition, latLng) => _handleTap(latLng),
                   ),
                   children: [
@@ -238,14 +257,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 void _launchMaps(LatLng start, LatLng end) async {
   final String googleMapsUrl =
       'https://www.google.com/maps/dir/?api=1&origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&travelmode=driving';
-  final String wazeUrl =
-      'https://waze.com/ul?ll=${end.latitude},${end.longitude}&navigate=yes';
+  final String appleMapsUrl =
+      'https://maps.apple.com/?saddr=${start.latitude},${start.longitude}&daddr=${end.latitude},${end.longitude}&dirflg=d';
 
-  if (await canLaunch(googleMapsUrl)) {
-    await launch(googleMapsUrl);
-  } else if (await canLaunch(wazeUrl)) {
-    await launch(wazeUrl);
-  } else {
-    throw 'Could not launch URL';
+  if (Platform.isAndroid) {
+    if (await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
+      throw 'no se encontro';
+    }
+  } else if (Platform.isIOS) {
+    if (await canLaunch(appleMapsUrl)) {
+      await launch(appleMapsUrl);
+    } else {
+      throw 'no se encontro';
+    }
   }
 }
