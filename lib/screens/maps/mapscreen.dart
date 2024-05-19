@@ -2,26 +2,29 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:macrologistic/config/enviroments.dart';
+import 'package:macrologistic/providers/mylocation.dart';
 import 'package:macrologistic/widgets/conductor.dart';
 import 'package:open_route_service/open_route_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
-class MapScreen extends StatefulWidget {
+class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends ConsumerState<MapScreen> {
   late LatLng myPoint;
   bool isLoading = false;
 
   @override
   void initState() {
+    myPoint = ref.read(locationProvider);
+    print("MyPoint: $myPoint");
     myPoint = defaultPoint;
     super.initState();
   }
@@ -31,8 +34,6 @@ class _MapScreenState extends State<MapScreen> {
   List listOfPoints = [];
   List<LatLng> points = [];
   List<Marker> markers = [];
-
-  
 
   Future<void> getCoordinates(LatLng lat1, LatLng lat2) async {
     setState(() {
@@ -71,7 +72,7 @@ class _MapScreenState extends State<MapScreen> {
             point: latLng,
             width: 80,
             height: 80,
-            child:  Draggable(
+            child: Draggable(
               feedback: IconButton(
                 onPressed: () {},
                 icon: const Icon(Icons.location_on),
@@ -121,85 +122,90 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final location = ref.watch(locationProvider);
     return Scaffold(
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: mapController,
-            options: MapOptions(
-              zoom: 16,
-              center: myPoint,
-              onTap: (tapPosition, latLng) => _handleTap(latLng),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-              ),
-              MarkerLayer(
-                markers: markers,
-              ),
-              PolylineLayer(
-                polylineCulling: false,
-                polylines: [
-                  Polyline(
-                    points: points,
-                    color: Enviroments.primaryColor,
-                    strokeWidth: 5,
+      body: location == null
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Stack(
+              children: [
+                FlutterMap(
+                  mapController: mapController,
+                  options: MapOptions(
+                    zoom: 16,
+                    center: location != null
+                        ? LatLng(location.latitude, location.longitude)
+                        : defaultPoint,
+                    onTap: (tapPosition, latLng) => _handleTap(latLng),
                   ),
-                ],
-              ),
-            ],
-          ),
-          Visibility(
-            visible: isLoading,
-            child: Container(
-              color: Enviroments.primaryColor,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                    ),
+                    MarkerLayer(
+                      markers: markers,
+                    ),
+                    PolylineLayer(
+                      polylineCulling: false,
+                      polylines: [
+                        Polyline(
+                          points: points,
+                          color: Enviroments.primaryColor,
+                          strokeWidth: 5,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 20.0,
-            left: MediaQuery.of(context).size.width / 2 - 110,
-            child: Align(
-              child: TextButton(
-                onPressed: () {
-                  if (markers.isNotEmpty) {
-                    _launchMaps(markers[0].point, markers[1].point);
-                  }
-   
-                },
-                child: Container(
-                  width: 200,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      color: Enviroments.primaryColor,
-                      borderRadius: BorderRadius.circular(10)),
-
-                    
-                  child: Center(
-                    child: Text(
-                      markers.isEmpty ? "Ruta" : "Ver en Maps",
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                Visibility(
+                  visible: isLoading,
+                  child: Container(
+                    color: Enviroments.primaryColor,
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 20.0,
+                  left: MediaQuery.of(context).size.width / 2 - 110,
+                  child: Align(
+                    child: TextButton(
+                      onPressed: () {
+                        if (markers.isNotEmpty) {
+                          _launchMaps(markers[0].point, markers[1].point);
+                        }
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Enviroments.primaryColor,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Center(
+                          child: Text(
+                            markers.isEmpty ? "Ruta" : "Ver en Maps",
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 18),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          
           const SizedBox(height: 10),
           FloatingActionButton(
             backgroundColor: Colors.blue,
@@ -228,9 +234,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
+
 void _launchMaps(LatLng start, LatLng end) async {
-  final String googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&travelmode=driving';
-  final String wazeUrl = 'https://waze.com/ul?ll=${end.latitude},${end.longitude}&navigate=yes';
+  final String googleMapsUrl =
+      'https://www.google.com/maps/dir/?api=1&origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&travelmode=driving';
+  final String wazeUrl =
+      'https://waze.com/ul?ll=${end.latitude},${end.longitude}&navigate=yes';
 
   if (await canLaunch(googleMapsUrl)) {
     await launch(googleMapsUrl);
