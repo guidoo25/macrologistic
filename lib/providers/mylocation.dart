@@ -1,46 +1,98 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:macrologistic/config/enviroments.dart';
+import 'package:open_route_service/open_route_service.dart';
 
-final defaultPoint = LatLng(-2.19616, -79.88621);
+final myLocationProvider = StateProvider<LatLng?>((ref) => null);
+final destinationProvider = StateProvider<LatLng?>((ref) => null);
+final markersProvider = StateProvider<List<Marker>>((ref) => []);
+final pointsProvider = StateProvider<List<LatLng>>((ref) => []);
+final isLoadingProvider = StateProvider<bool>((ref) => false);
 
-final locationProvider = StateNotifierProvider<LocationNotifier, LatLng>((ref) {
-  return LocationNotifier();
-});
-
-class LocationNotifier extends StateNotifier<LatLng> {
-  LocationNotifier() : super(defaultPoint) {
-    getCurrentLocation();
-  }
-
-  Future<void> getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+Future<void> updateMyLocation(WidgetRef ref) async {
+  try {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      throw Exception('Location services are disabled.');
     }
 
-    permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+        throw Exception('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
+      throw Exception(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
     final position = await Geolocator.getCurrentPosition();
-    state = LatLng(position.latitude, position.longitude);
+    ref.read(myLocationProvider.notifier).state =
+        LatLng(position.latitude, position.longitude);
+  } catch (e) {
+    print('Error getting location: $e');
   }
+}
 
-  Future<LatLng> waitForNewLocation() async {
-    final position = await Geolocator.getCurrentPosition();
-    return LatLng(position.latitude, position.longitude);
+void updateMarkers(WidgetRef ref) {
+  final myLocation = ref.read(myLocationProvider);
+  final destination = ref.read(destinationProvider);
+
+  if (myLocation != null && destination != null) {
+    ref.read(markersProvider.notifier).state = [
+      Marker(
+        point: myLocation,
+        width: 80,
+        height: 80,
+        child: const Icon(Icons.my_location, color: Colors.blue, size: 45),
+      ),
+      Marker(
+        point: destination,
+        width: 80,
+        height: 80,
+        child: const Icon(Icons.location_on, color: Colors.red, size: 45),
+      ),
+    ];
+  }
+}
+
+Future<void> getCoordinates(WidgetRef ref, LatLng lat1, LatLng lat2) async {
+  ref.read(isLoadingProvider.notifier).state = true;
+
+  final OpenRouteService client = OpenRouteService(
+    apiKey: Enviroments.apiMap,
+  );
+
+  try {
+    final List<ORSCoordinate> routeCoordinates =
+        await client.directionsRouteCoordsGet(
+      startCoordinate: ORSCoordinate(
+        latitude: lat1.latitude,
+        longitude: lat1.longitude,
+      ),
+      endCoordinate: ORSCoordinate(
+        latitude: lat2.latitude,
+        longitude: lat2.longitude,
+      ),
+    );
+
+    final List<LatLng> routePoints = routeCoordinates
+        .map(
+          (coordinate) => LatLng(coordinate.latitude, coordinate.longitude),
+        )
+        .toList();
+
+    ref.read(pointsProvider.notifier).state = routePoints;
+  } catch (e) {
+    print('Error getting route coordinates: $e');
+  } finally {
+    ref.read(isLoadingProvider.notifier).state = false;
   }
 }

@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:macrologistic/config/enviroments.dart';
 import 'package:macrologistic/providers/mylocation.dart';
-import 'package:macrologistic/widgets/conductor.dart';
 import 'package:open_route_service/open_route_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -18,113 +19,77 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  late LatLng myPoint;
-  bool isLoading = false;
+  final MapController mapController = MapController();
+  final LatLng defaultPoint = LatLng(-2.19616, -79.88621);
 
   @override
   void initState() {
-    myPoint = ref.read(locationProvider);
-    print("MyPoint: $myPoint");
-    myPoint = defaultPoint;
     super.initState();
+    updateMyLocation(ref);
   }
 
-  final defaultPoint = LatLng(-2.19616, -79.88621);
-
-  List listOfPoints = [];
-  List<LatLng> points = [];
-  List<Marker> markers = [];
-
   Future<void> getCoordinates(LatLng lat1, LatLng lat2) async {
-    setState(() {
-      isLoading = true;
-    });
+    ref.read(isLoadingProvider.notifier).state = true;
 
     final OpenRouteService client = OpenRouteService(
       apiKey: Enviroments.apiMap,
     );
 
-    final List<ORSCoordinate> routeCoordinates =
-        await client.directionsRouteCoordsGet(
-      startCoordinate:
-          ORSCoordinate(latitude: lat1.latitude, longitude: lat1.longitude),
-      endCoordinate:
-          ORSCoordinate(latitude: lat2.latitude, longitude: lat2.longitude),
-    );
+    try {
+      final List<ORSCoordinate> routeCoordinates =
+          await client.directionsRouteCoordsGet(
+        startCoordinate:
+            ORSCoordinate(latitude: lat1.latitude, longitude: lat1.longitude),
+        endCoordinate:
+            ORSCoordinate(latitude: lat2.latitude, longitude: lat2.longitude),
+      );
 
-    final List<LatLng> routePoints = routeCoordinates
-        .map((coordinate) => LatLng(coordinate.latitude, coordinate.longitude))
-        .toList();
+      final List<LatLng> routePoints = routeCoordinates
+          .map(
+              (coordinate) => LatLng(coordinate.latitude, coordinate.longitude))
+          .toList();
 
-    setState(() {
-      points = routePoints;
-      isLoading = false;
-    });
+      ref.read(pointsProvider.notifier).state = routePoints;
+    } catch (e) {
+      print('Error getting route coordinates: $e');
+    } finally {
+      ref.read(isLoadingProvider.notifier).state = false;
+    }
   }
 
-  final MapController mapController = MapController();
-
   void _handleTap(LatLng latLng) {
-    setState(() {
-      if (markers.length < 2) {
-        markers.add(
-          Marker(
-            point: latLng,
-            width: 80,
-            height: 80,
-            child: Draggable(
-              feedback: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.location_on),
-                color: Colors.blue,
-                iconSize: 45,
-              ),
-              onDragEnd: (details) {
-                setState(() {
-                  print(
-                      "Latitude: ${latLng.latitude}, Longitude: ${latLng.longitude}");
-                });
-              },
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.location_on),
-                color: Enviroments.primaryColor,
-                iconSize: 45,
-              ),
-            ),
-          ),
-        );
-      }
+    final myLocation = ref.read(myLocationProvider);
+    if (myLocation != null) {
+      ref.read(destinationProvider.notifier).state = latLng;
 
-      if (markers.length == 1) {
-        double zoomLevel = 16.5;
-        mapController.move(latLng, zoomLevel);
-      }
+      ref.read(markersProvider.notifier).state = [
+        Marker(
+          point: myLocation,
+          width: 80,
+          height: 80,
+          child: const Icon(Icons.my_location, color: Colors.blue, size: 45),
+        ),
+        Marker(
+          point: latLng,
+          width: 80,
+          height: 80,
+          child: const Icon(Icons.location_on, color: Colors.red, size: 45),
+        ),
+      ];
 
-      if (markers.length == 2) {
-        // Adicionar um pequeno atraso antes de exibir o efeito de processo
-        Future.delayed(const Duration(milliseconds: 500), () {
-          setState(() {
-            isLoading = true;
-          });
-        });
-
-        getCoordinates(markers[0].point, markers[1].point);
-
-        // Calcular a extensão (bounding box) que envolve os dois pontos marcados
-        LatLngBounds bounds = LatLngBounds.fromPoints(
-            markers.map((marker) => marker.point).toList());
-        // Fazer um zoom out para que a extensão se ajuste à tela
-        mapController.fitBounds(bounds);
-      }
-    });
+      getCoordinates(myLocation, latLng);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final location = ref.watch(locationProvider);
+    final markers = ref.watch(markersProvider);
+    final points = ref.watch(pointsProvider);
+    final isLoading = ref.watch(isLoadingProvider);
+    final myLocation = ref.watch(myLocationProvider);
+
     return Scaffold(
-      body: location == null
+      body: myLocation == null
           ? const Center(
               child: CircularProgressIndicator(),
             )
@@ -134,9 +99,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   mapController: mapController,
                   options: MapOptions(
                     zoom: 16,
-                    center: location != null
-                        ? LatLng(location.latitude, location.longitude)
-                        : defaultPoint,
+                    center: myLocation ?? defaultPoint,
                     onTap: (tapPosition, latLng) => _handleTap(latLng),
                   ),
                   children: [
@@ -163,13 +126,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 Visibility(
                   visible: isLoading,
                   child: Container(
-                    color: Enviroments.primaryColor,
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
+                    color: Enviroments.primaryColor.withOpacity(0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -179,9 +139,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   left: MediaQuery.of(context).size.width / 2 - 110,
                   child: Align(
                     child: TextButton(
-                      onPressed: () {
-                        if (markers.isNotEmpty) {
-                          _launchMaps(markers[0].point, markers[1].point);
+                      onPressed: () async {
+                        if (ref.read(markersProvider).length == 2) {
+                          final start = ref.read(markersProvider)[0].point;
+                          final end = ref.read(markersProvider)[1].point;
+
+                          _launchMaps(start, end);
                         }
                       },
                       child: Container(
@@ -192,7 +155,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             borderRadius: BorderRadius.circular(10)),
                         child: Center(
                           child: Text(
-                            markers.isEmpty ? "Ruta" : "Ver en Maps",
+                            ref.read(markersProvider).length < 2
+                                ? "Ruta"
+                                : "Ver en Maps",
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 18),
                           ),
@@ -228,7 +193,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               color: Colors.white,
             ),
           ),
-          //CardConductor(),
         ],
       ),
     );

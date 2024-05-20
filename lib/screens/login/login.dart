@@ -16,8 +16,6 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final authService = Provider.of<AuthService>( context );
-
     void showSnackbar(BuildContext context, String message) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context)
@@ -29,110 +27,73 @@ class LoginPage extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                height: MediaQuery.of(context).size.height * 0.40,
-                width: MediaQuery.of(context).size.width,
-                color: Enviroments.primaryColor,
+                height: MediaQuery.of(context).size.height * 0.35,
+                decoration: BoxDecoration(
+                  color: Enviroments.primaryColor,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(45),
+                    bottomRight: Radius.circular(45),
+                  ),
+                ),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 20,),
-                    Image(image: AssetImage('icono.png'), width: 200, height: 200,),
-
+                    SizedBox(height: 20),
+                    Image.asset('assets/icono.png', width: 100, height: 100),
+                    SizedBox(height: 20),
                     Text(
                       'Iniciar Sesión',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 35,
-                      )),
-                      Text(
-                        'Visualiza tus viajes asignados, rutas optimas y horarios.',
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          color: Colors.white,
-                          fontSize: 15,
-                        )),
-                        SizedBox(height: 10,),
-                        Text ('!Seguridad primero!',
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          color: Colors.white,
-                          fontSize: 22,
-                        ))
-
-                    
-
+                        fontSize: 25,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
                   ],
                 ),
               ),
-                Container(
-            
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(45),
-                      topRight: Radius.circular(45),
-
+              SizedBox(height: 20),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Image.asset('assets/logoSistema.png',
+                        width: 175, height: 175),
+                    SizedBox(height: 20),
+                    MyTextField(
+                      controller: usernameController,
+                      hintText: 'Usuario',
+                      obscureText: false,
                     ),
-                  ),
-                  child:Column(
-                    children: [
-                      Container(
-                child: Image.asset(
-                    'logoSistema.png'),
-                width: 200,
-                height: 200,
+                    SizedBox(height: 20),
+                    MyTextField(
+                      controller: passwordController,
+                      hintText: 'Contraseña',
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: Text('Olvidaste tu contraseña?'),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    MyButton(
+                      color: Colors.blue,
+                      onTap: () {
+                        context.go('/home');
+                      },
+                      nametext: 'Ingresar',
+                    ),
+                  ],
+                ),
               ),
-              
-              MyTextField(
-                controller: usernameController,
-                hintText: 'Usuario',
-                obscureText: false,
-              ),
-
-              const SizedBox(height: 5),
-              MyTextField(
-                controller: passwordController,
-                hintText: 'Contraseña',
-                obscureText: true,
-              ),
-              TextButton(onPressed: (){}, child: Text('Olvidaste tu contraseña?')),
-              MyButton(
-                color: Colors.blue,
-                onTap: () {
-                  context.go('/home');
-                  
-
-                },
-                // Commented out the onTap code block
-                // onTap: ref.watch(authProvider).autenticando
-                //     ? null
-                //     : () async {
-                //         FocusScope.of(context).unfocus();
-
-                //         final loginOk =
-                //             await ref.read(authProvider.notifier).login(
-                //                   usernameController.text.trim(),
-                //                   passwordController.text.trim(),
-                //                 );
-
-                //         if (loginOk) {
-                //           // TODO: Cambiar a mi main page
-                //           context.go('/home');
-                //         } else {
-                //           // Mostrar alerta
-                //           showSnackbar(context, "Error al iniciar sesión");
-                //         }
-                //       },
-                nametext: 'Ingresar', 
-              ),
-
-                    ],
-                  ),
-                )
             ],
-            
           ),
         ),
       ),
