@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:macrologistic/screens/conductor/list_viaJes.dart';
 import 'package:macrologistic/screens/homescreen.dart';
 import 'package:macrologistic/screens/maps/mapview.dart';
+import 'package:macrologistic/screens/perfil/perfil.dart';
 
 class navbar extends StatefulWidget {
   static const name = 'homeScreen';
@@ -13,7 +14,7 @@ class navbar extends StatefulWidget {
 
 class _homeScreenState extends State<navbar> {
   int selectedIndex = 0;
-  final screens = [Homescreen(), ListViajes(), SimpleExample()];
+  final screens = [Homescreen(), ListViajes(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +24,11 @@ class _homeScreenState extends State<navbar> {
         index: selectedIndex,
         children: screens,
       ),
-      bottomNavigationBar: CupertinoTabBar( // Use CupertinoTabBar for Apple-like appearance
+      bottomNavigationBar: CupertinoTabBar(
+        // Use CupertinoTabBar for Apple-like appearance
         backgroundColor: color.primary,
         activeColor: Colors.white,
-        
+
         currentIndex: selectedIndex,
         onTap: ((value) => setState(() => selectedIndex = value)),
         items: [

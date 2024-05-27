@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:macrologistic/models/viaje.dart';
+import 'package:macrologistic/models/reservas_response.dart';
 
 class ConductorCard extends StatelessWidget {
-  final Viaje viaje;
+  final ReservasResponse reserva;
 
   ConductorCard({
-    required this.viaje,
+    required this.reserva,
   });
 
   @override
@@ -32,7 +32,7 @@ class ConductorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Origen: ${viaje.origen}',
+                'Origen: ${reserva.descripcionInicio}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -40,40 +40,43 @@ class ConductorCard extends StatelessWidget {
               ),
               SizedBox(height: 5),
               Text(
-                'Cliente: ${viaje.cliente}',
+                'Destino: ${reserva.descripcionFin}',
                 style: TextStyle(
                   fontSize: 14,
                 ),
               ),
               SizedBox(height: 5),
               Text(
-                'Destino: ${viaje.destino}',
+                'Fecha Inicio: ${reserva.fechaInicio.toLocal()}',
                 style: TextStyle(
                   fontSize: 14,
                 ),
               ),
               SizedBox(height: 5),
               Text(
-                'Fecha: ${viaje.fecha}',
+                'Fecha Fin: ${reserva.fechaFin.toLocal()}',
                 style: TextStyle(
                   fontSize: 14,
                 ),
               ),
               SizedBox(height: 5),
               Text(
-                'Estado: ${viaje.estado}',
+                'Estado: ${reserva.estado}',
                 style: TextStyle(
                   fontSize: 14,
                 ),
               ),
+              Text(
+                'Fecha: ${reserva.fechaInicio}',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              )
             ],
           ),
           const Spacer(),
-          Image.asset(
-            'assets/${viaje.imagen}',
-            width: 50,
-            height: 50,
-          ),
+          // Si tienes una imagen asociada con la reserva, ajusta esto según sea necesario.
+          // Actualmente, ReservasResponse no tiene un campo imagen.
         ],
       ),
     );

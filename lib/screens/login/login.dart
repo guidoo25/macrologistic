@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:macrologistic/config/enviroments.dart';
+import 'package:macrologistic/providers/auth_providers.dart';
 import 'package:macrologistic/shared/login/my_button.dart';
 import 'package:macrologistic/shared/login/my_textfield.dart';
 
@@ -85,9 +86,24 @@ class LoginPage extends ConsumerWidget {
                     SizedBox(height: 20),
                     MyButton(
                       color: Colors.blue,
-                      onTap: () {
-                        context.go('/home');
-                      },
+                      onTap: ref.watch(authProvider).autenticando
+                          ? null
+                          : () async {
+                              final loginOk =
+                                  await ref.read(authProvider.notifier).login(
+                                        usernameController.text.trim(),
+                                        passwordController.text.trim(),
+                                      );
+
+                              if (loginOk) {
+                                // TODO: Cambiar a mi main page
+                                context.go('/home');
+                              } else {
+                                // Mostrar alerta
+                                showSnackbar(
+                                    context, "Error al iniciar sesión");
+                              }
+                            },
                       nametext: 'Ingresar',
                     ),
                   ],

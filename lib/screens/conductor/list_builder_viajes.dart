@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:macrologistic/models/viaje.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:macrologistic/models/reservas_response.dart';
+import 'package:macrologistic/providers/mylocation.dart';
+import 'package:macrologistic/screens/reservas/home_reservas.dart';
 
-class Listviajest extends StatelessWidget {
-  List<Viaje> viajesBonitos = [];
-  
+class Listviajest extends ConsumerWidget {
+  final List<ReservasResponse> reservas;
+
   Listviajest({
-    required this.viajesBonitos,
+    required this.reservas,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView.builder(
-      itemCount: viajesBonitos.length,
+      itemCount: reservas.length,
       itemBuilder: (context, index) {
-        Viaje viaje = viajesBonitos[index];
+        ReservasResponse reserva = reservas[index];
 
         // Determinar el color del estado
-        Color estadoColor = index % 2 == 0 ? Colors.green : Colors.red;
+        Color estadoColor =
+            reserva.estado == 'FINALIZADO' ? Colors.green : Colors.yellow;
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -35,11 +41,12 @@ class Listviajest extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: const Icon(Icons.location_on),
-            title: Text('Salida:${viaje.origen}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text('Salida: ${reserva.descripcionInicio}',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Row(
-              children:  [
+              children: [
                 Icon(Icons.arrow_forward),
-                Text('Destino:${viaje.destino}'),
+                Text('Destino: ${reserva.descripcionFin}'),
               ],
             ),
             trailing: CircleAvatar(
@@ -47,31 +54,45 @@ class Listviajest extends StatelessWidget {
               radius: 9,
             ),
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Trazabilidad del viaje'),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Cliente: ${viaje.cliente}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Destino: ${viaje.destino}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Descripción: ${viaje.descripcion}', style: const TextStyle(fontSize: 12)),
-                      Text('Estado: ${viaje.estado}', style: const TextStyle(color: Colors.grey)),
-                      Container(
-                        child: viaje.imagen.isNotEmpty ? Image.asset('${viaje.imagen}', height: 150) : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cerrar'),
-                    ),
-                  ],
+              ref.read(destinationProvider.notifier).state = LatLng(
+                double.parse(reserva.latitudDestino),
+                double.parse(reserva.longitudDestino),
+              );
+              ref.read(myLocationProvider.notifier).state = LatLng(
+                double.parse(reserva.latitudOrigen),
+                double.parse(reserva.longitdOrigen),
+              );
+              ref.read(markersProvider.notifier).state = [
+                Marker(
+                  point: LatLng(double.parse(reserva.latitudOrigen),
+                      double.parse(reserva.longitdOrigen)),
+                  width: 80,
+                  height: 80,
+                  child: const Icon(Icons.my_location,
+                      color: Colors.blue, size: 45),
                 ),
+                Marker(
+                  point: LatLng(double.parse(reserva.latitudDestino),
+                      double.parse(reserva.longitudDestino)),
+                  width: 80,
+                  height: 80,
+                  child: const Icon(Icons.location_on,
+                      color: Colors.red, size: 45),
+                ),
+                if (reserva.latitudIntermedio != null &&
+                    reserva.longitudIntermedio != null)
+                  Marker(
+                    point: LatLng(double.parse(reserva.latitudIntermedio),
+                        double.parse(reserva.longitudIntermedio)),
+                    width: 80,
+                    height: 80,
+                    child: const Icon(Icons.location_on,
+                        color: Colors.orange, size: 45),
+                  ),
+              ];
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomeReservas()),
               );
             },
           ),

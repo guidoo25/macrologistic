@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:macrologistic/config/enviroments.dart';
+import 'package:macrologistic/models/reservas_response.dart';
 import 'package:open_route_service/open_route_service.dart';
 
 final myLocationProvider = StateProvider<LatLng?>((ref) => null);
@@ -17,27 +18,27 @@ Future<void> updateMyLocation(WidgetRef ref) async {
   try {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
+      throw Exception('permisos ubicacion negados.');
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Location permissions are denied');
+        throw Exception('permisos de ubicación denegados.');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       throw Exception(
-          'Location permissions are permanently denied, we cannot request permissions.');
+          'Permisos de ubicación denegados para siempre, no podemos solicitar permisos.');
     }
 
     final position = await Geolocator.getCurrentPosition();
     ref.read(myLocationProvider.notifier).state =
         LatLng(position.latitude, position.longitude);
   } catch (e) {
-    print('Error getting location: $e');
+    print('Error al ir a ubicacion: $e');
   }
 }
 
@@ -91,8 +92,10 @@ Future<void> getCoordinates(WidgetRef ref, LatLng lat1, LatLng lat2) async {
 
     ref.read(pointsProvider.notifier).state = routePoints;
   } catch (e) {
-    print('Error getting route coordinates: $e');
+    print('Error de rutas cordenadas: $e');
   } finally {
     ref.read(isLoadingProvider.notifier).state = false;
   }
 }
+
+final selectedReservaProvider = StateProvider<ReservasResponse?>((ref) => null);
