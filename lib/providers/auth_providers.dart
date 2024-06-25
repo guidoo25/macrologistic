@@ -35,12 +35,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState(autenticando: false);
 
     if (resp.statusCode == 200) {
-      final loginResponse = authResponseFromJson(resp.body);
+      try {
+        final loginResponse = authResponseFromJson(resp.body);
 
-      await this._guardarData(loginResponse.data.idRol,
-          loginResponse.data.apellidos, loginResponse.data.idUsuario);
-
-      return true;
+        await this._guardarData(
+            loginResponse.data.idRol.toString(),
+            loginResponse.data.apellidos,
+            loginResponse.data.idUsuario.toString());
+        return true;
+      } catch (e) {
+        print("Error al deserializar la respuesta: $e");
+        return false;
+      }
     } else {
       return false;
     }

@@ -12,7 +12,7 @@ String reservasResponseToJson(List<ReservasResponse> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ReservasResponse {
-  String idReserva;
+  int idReserva;
   String codigo;
   DateTime fechaInicio;
   DateTime fechaFin;
@@ -23,8 +23,8 @@ class ReservasResponse {
   String longitudDestino;
   String latitudOrigen;
   String longitdOrigen;
-  dynamic latitudIntermedio;
-  dynamic longitudIntermedio;
+  String latitudIntermedio;
+  String longitudIntermedio;
 
   ReservasResponse({
     required this.idReserva,

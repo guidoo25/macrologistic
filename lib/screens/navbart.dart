@@ -14,7 +14,7 @@ class navbar extends StatefulWidget {
 
 class _homeScreenState extends State<navbar> {
   int selectedIndex = 0;
-  final screens = [Homescreen(), ListViajes(), ProfilePage()];
+  final screens = [ListViajes(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +26,23 @@ class _homeScreenState extends State<navbar> {
       ),
       bottomNavigationBar: CupertinoTabBar(
         // Use CupertinoTabBar for Apple-like appearance
-        backgroundColor: color.primary,
+        backgroundColor: Colors.white,
         activeColor: Colors.white,
 
         currentIndex: selectedIndex,
         onTap: ((value) => setState(() => selectedIndex = value)),
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.car_rental_rounded),
-            activeIcon: Icon(Icons.car_rental),
+            icon: Icon(Icons.home),
+            activeIcon: Icon(Icons.home_filled),
+            backgroundColor: color.primary,
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.travel_explore_rounded),
-            activeIcon: Icon(Icons.travel_explore_rounded),
+            icon: Icon(Icons.person),
+            activeIcon: Icon(Icons.person),
             label: 'viajes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_sharp),
-            activeIcon: Icon(Icons.list),
-            label: 'perfil',
+            backgroundColor: color.primary,
           ),
         ],
       ),
